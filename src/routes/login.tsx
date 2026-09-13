@@ -27,12 +27,13 @@ function LoginPage() {
         <div className="auth-art" aria-hidden="true">
           <div className="auth-glow" />
           <img
-            src="/images/voxel/adventurer.webp"
-            srcSet="/images/voxel/adventurer-560.webp 560w, /images/voxel/adventurer.webp 720w"
+            src="/images/ncreate/mascot-front.webp"
+            srcSet="/images/ncreate/mascot-front-640.webp 640w, /images/ncreate/mascot-front.webp 760w"
             sizes="(max-width: 820px) 80vw, 520px"
-            width="720"
-            height="720"
+            width="760"
+            height="1199"
             alt=""
+            loading="eager"
           />
         </div>
         <div className="auth-card">

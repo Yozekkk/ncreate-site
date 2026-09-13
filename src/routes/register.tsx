@@ -17,15 +17,16 @@ function RegisterPage() {
   return (
     <SiteShell>
       <section className="auth-page reverse">
-        <div className="auth-art resources" aria-hidden="true">
+        <div className="auth-art accent" aria-hidden="true">
           <div className="auth-glow" />
           <img
-            src="/images/voxel/resources.webp"
-            srcSet="/images/voxel/resources-560.webp 560w, /images/voxel/resources.webp 720w"
+            src="/images/ncreate/mascot-back.webp"
+            srcSet="/images/ncreate/mascot-back-480.webp 480w, /images/ncreate/mascot-back.webp 552w"
             sizes="(max-width: 820px) 80vw, 520px"
-            width="720"
-            height="720"
+            width="552"
+            height="1199"
             alt=""
+            loading="eager"
           />
         </div>
         <div className="auth-card">

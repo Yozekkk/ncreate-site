@@ -1,6 +1,15 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowDownRight, MessageCircle, Play, Send, Youtube } from "lucide-react";
+import {
+  ArrowDownRight,
+  Blocks,
+  Compass,
+  MessageCircle,
+  Play,
+  Send,
+  Youtube,
+  type LucideIcon,
+} from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { COMING_SOON, getSettings } from "../lib";
@@ -8,12 +17,42 @@ import { PlayDialog, Reveal, SiteShell } from "../ui";
 
 export const Route = createFileRoute("/")({ component: Home });
 
-const cards = [
-  { name: "computer", alt: "Старый пиксельный компьютер", width: 1287, height: 1222 },
-  { name: "orange-container", alt: "Оранжевый кубический контейнер", width: 1230, height: 1278 },
-  { name: "forge", alt: "Механизмы", width: 720, height: 720 },
-  { name: "adventurer", alt: "Персонаж", width: 720, height: 720 },
-] as const;
+type FeatureCard =
+  | {
+      kind: "image";
+      name: string;
+      alt: string;
+      src: string;
+      srcSet: string;
+      width: number;
+      height: number;
+    }
+  | { kind: "icon"; name: string; icon: LucideIcon };
+
+const cards: FeatureCard[] = [
+  {
+    kind: "image",
+    name: "soldier",
+    alt: "Синий Minecraft-персонаж в броне с оружием",
+    src: "/images/ncreate/server-card-soldier.webp",
+    srcSet:
+      "/images/ncreate/server-card-soldier-560.webp 560w, /images/ncreate/server-card-soldier.webp 1102w",
+    width: 1102,
+    height: 1368,
+  },
+  {
+    kind: "image",
+    name: "engineer",
+    alt: "Оранжевый Minecraft-инженер с оборудованием",
+    src: "/images/ncreate/server-card-engineer.webp",
+    srcSet:
+      "/images/ncreate/server-card-engineer-840.webp 840w, /images/ncreate/server-card-engineer.webp 1672w",
+    width: 1672,
+    height: 941,
+  },
+  { kind: "icon", name: "blocks", icon: Blocks },
+  { kind: "icon", name: "compass", icon: Compass },
+];
 
 function Home() {
   const { data: s } = useQuery({ queryKey: ["settings"], queryFn: getSettings });
@@ -59,13 +98,13 @@ function Home() {
           <div className="pixel-spark spark-two" />
           <div className="pixel-spark spark-three" />
           <motion.img
-            className="hero-rider"
-            src="/images/voxel/hero-rider.webp"
-            srcSet="/images/voxel/hero-rider-640.webp 640w, /images/voxel/hero-rider.webp 1158w"
-            sizes="(max-width: 820px) 94vw, 590px"
-            width="1158"
-            height="1359"
-            alt="Персонаж NCreate в броне верхом на лошади с оружием"
+            className="hero-mascot"
+            src="/images/ncreate/mascot-front.webp"
+            srcSet="/images/ncreate/mascot-front-640.webp 640w, /images/ncreate/mascot-front.webp 760w"
+            sizes="(max-width: 820px) 90vw, 560px"
+            width="760"
+            height="1199"
+            alt="Официальный маскот NCreate"
             fetchPriority="high"
             initial={{ opacity: 0, scale: 0.94, y: 28 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -101,19 +140,30 @@ function Home() {
           <p>На сервере {s?.online_players ?? 0} игроков</p>
         </Reveal>
         <div className="feature-cards">
-          {cards.map(({ name, alt, width, height }, index) => (
-            <Reveal className={`feature-card card-${index + 1}`} key={name}>
-              <motion.img
-                src={`/images/voxel/${name}.webp`}
-                srcSet={`/images/voxel/${name}-560.webp 560w, /images/voxel/${name}.webp ${width}w`}
-                sizes="(max-width: 820px) calc(100vw - 68px), 310px"
-                width={width}
-                height={height}
-                alt={`Декоративный воксельный объект: ${alt}`}
-                loading="lazy"
-                whileHover={{ y: -8, rotate: index % 2 ? 1.5 : -1.5 }}
-              />
-              <div>
+          {cards.map((card, index) => (
+            <Reveal className={`feature-card card-${index + 1}`} key={card.name}>
+              {card.kind === "image" ? (
+                <motion.img
+                  className="feature-card-art"
+                  src={card.src}
+                  srcSet={card.srcSet}
+                  sizes="(max-width: 820px) calc(100vw - 68px), 310px"
+                  width={card.width}
+                  height={card.height}
+                  alt={card.alt}
+                  loading="lazy"
+                  whileHover={{ y: -8, rotate: index % 2 ? 1.5 : -1.5 }}
+                />
+              ) : (
+                <motion.div
+                  className="feature-icon-art"
+                  aria-hidden="true"
+                  whileHover={{ y: -8, rotate: index % 2 ? 1.5 : -1.5 }}
+                >
+                  <card.icon />
+                </motion.div>
+              )}
+              <div className="feature-card-copy">
                 <span>0{index + 1}</span>
                 <h3>{COMING_SOON}</h3>
                 <p>Информация появится позже</p>
@@ -143,16 +193,16 @@ function Home() {
           </Reveal>
           <Reveal className="workshop-visual">
             <div className="orange-orbit" />
-            <img
-              className="builder-render"
-              src="/images/voxel/builder.webp"
-              srcSet="/images/voxel/builder-900.webp 900w, /images/voxel/builder.webp 1659w"
-              sizes="(max-width: 820px) calc(100vw - 32px), 700px"
-              width="1659"
-              height="948"
-              loading="lazy"
-              alt="Minecraft-строитель с молотком, ограждением и дорожными конусами"
-            />
+            <div className="workshop-brand-art" aria-hidden="true">
+              <Blocks />
+              <img
+                src="/images/brand/ncreate-logo.webp"
+                width="500"
+                height="500"
+                loading="lazy"
+                alt=""
+              />
+            </div>
           </Reveal>
         </div>
       </section>
@@ -171,11 +221,14 @@ function Home() {
           </button>
         </Reveal>
         <img
-          src="/images/voxel/adventurer-560.webp"
-          width="560"
-          height="560"
+          className="play-mascot"
+          src="/images/ncreate/mascot-back.webp"
+          srcSet="/images/ncreate/mascot-back-480.webp 480w, /images/ncreate/mascot-back.webp 552w"
+          sizes="(max-width: 820px) 78vw, 520px"
+          width="552"
+          height="1199"
           loading="lazy"
-          alt="Персонаж NCreate с киркой"
+          alt="Официальный маскот NCreate, вид сзади"
         />
       </section>
 
