@@ -1,0 +1,12 @@
+node_modules/
+.output/
+dist/
+.vinxi/
+.tanstack/
+.vercel/
+.env
+.env.local
+.env.*.local
+coverage/
+output/
+*.log
