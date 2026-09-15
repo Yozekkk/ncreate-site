@@ -2,13 +2,10 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowDownRight,
-  Blocks,
-  Compass,
   MessageCircle,
   Play,
   Send,
   Youtube,
-  type LucideIcon,
 } from "lucide-react";
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
@@ -17,41 +14,52 @@ import { PlayDialog, Reveal, SiteShell } from "../ui";
 
 export const Route = createFileRoute("/")({ component: Home });
 
-type FeatureCard =
-  | {
-      kind: "image";
-      name: string;
-      alt: string;
-      src: string;
-      srcSet: string;
-      width: number;
-      height: number;
-    }
-  | { kind: "icon"; name: string; icon: LucideIcon };
+type FeatureCard = {
+  name: string;
+  alt: string;
+  src: string;
+  srcSet: string;
+  width: number;
+  height: number;
+};
 
 const cards: FeatureCard[] = [
   {
-    kind: "image",
-    name: "soldier",
-    alt: "Синий Minecraft-персонаж в броне с оружием",
-    src: "/images/ncreate/server-card-soldier.webp",
+    name: "computer",
+    alt: "Старый кубический компьютер",
+    src: "/images/ncreate/ncreate-image-02.webp",
     srcSet:
-      "/images/ncreate/server-card-soldier-560.webp 560w, /images/ncreate/server-card-soldier.webp 1102w",
-    width: 1102,
-    height: 1368,
+      "/images/ncreate/ncreate-image-02-480.webp 480w, /images/ncreate/ncreate-image-02-640.webp 640w, /images/ncreate/ncreate-image-02-840.webp 840w, /images/ncreate/ncreate-image-02.webp 1228w",
+    width: 1228,
+    height: 1198,
   },
   {
-    kind: "image",
-    name: "engineer",
-    alt: "Оранжевый Minecraft-инженер с оборудованием",
-    src: "/images/ncreate/server-card-engineer.webp",
+    name: "orange-cube",
+    alt: "Оранжевый кубический объект",
+    src: "/images/ncreate/ncreate-image-03.webp",
     srcSet:
-      "/images/ncreate/server-card-engineer-840.webp 840w, /images/ncreate/server-card-engineer.webp 1672w",
-    width: 1672,
-    height: 941,
+      "/images/ncreate/ncreate-image-03-480.webp 480w, /images/ncreate/ncreate-image-03-640.webp 640w, /images/ncreate/ncreate-image-03-840.webp 840w, /images/ncreate/ncreate-image-03.webp 1155w",
+    width: 1155,
+    height: 1241,
   },
-  { kind: "icon", name: "blocks", icon: Blocks },
-  { kind: "icon", name: "compass", icon: Compass },
+  {
+    name: "lantern-creature",
+    alt: "Кубическое существо с фонарём",
+    src: "/images/ncreate/ncreate-image-05.webp",
+    srcSet:
+      "/images/ncreate/ncreate-image-05-480.webp 480w, /images/ncreate/ncreate-image-05-640.webp 640w, /images/ncreate/ncreate-image-05-840.webp 840w, /images/ncreate/ncreate-image-05.webp 1373w",
+    width: 1373,
+    height: 1106,
+  },
+  {
+    name: "red-hero",
+    alt: "Персонаж NCreate в красно-золотой мантии",
+    src: "/images/ncreate/ncreate-image-06.webp",
+    srcSet:
+      "/images/ncreate/ncreate-image-06-480.webp 480w, /images/ncreate/ncreate-image-06-640.webp 640w, /images/ncreate/ncreate-image-06-840.webp 840w, /images/ncreate/ncreate-image-06.webp 865w",
+    width: 865,
+    height: 1465,
+  },
 ];
 
 function Home() {
@@ -99,12 +107,12 @@ function Home() {
           <div className="pixel-spark spark-three" />
           <motion.img
             className="hero-mascot"
-            src="/images/ncreate/mascot-front.webp"
-            srcSet="/images/ncreate/mascot-front-640.webp 640w, /images/ncreate/mascot-front.webp 760w"
-            sizes="(max-width: 820px) 90vw, 560px"
-            width="760"
-            height="1199"
-            alt="Официальный маскот NCreate"
+            src="/images/ncreate/ncreate-image-01.webp"
+            srcSet="/images/ncreate/ncreate-image-01-480.webp 480w, /images/ncreate/ncreate-image-01-640.webp 640w, /images/ncreate/ncreate-image-01-840.webp 840w, /images/ncreate/ncreate-image-01.webp 1150w"
+            sizes="(max-width: 540px) 94vw, (max-width: 820px) 84vw, 680px"
+            width="1150"
+            height="1353"
+            alt="Персонаж NCreate в броне верхом на лошади"
             fetchPriority="high"
             initial={{ opacity: 0, scale: 0.94, y: 28 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -142,27 +150,17 @@ function Home() {
         <div className="feature-cards">
           {cards.map((card, index) => (
             <Reveal className={`feature-card card-${index + 1}`} key={card.name}>
-              {card.kind === "image" ? (
-                <motion.img
-                  className="feature-card-art"
-                  src={card.src}
-                  srcSet={card.srcSet}
-                  sizes="(max-width: 820px) calc(100vw - 68px), 310px"
-                  width={card.width}
-                  height={card.height}
-                  alt={card.alt}
-                  loading="lazy"
-                  whileHover={{ y: -8, rotate: index % 2 ? 1.5 : -1.5 }}
-                />
-              ) : (
-                <motion.div
-                  className="feature-icon-art"
-                  aria-hidden="true"
-                  whileHover={{ y: -8, rotate: index % 2 ? 1.5 : -1.5 }}
-                >
-                  <card.icon />
-                </motion.div>
-              )}
+              <motion.img
+                className="feature-card-art"
+                src={card.src}
+                srcSet={card.srcSet}
+                sizes="(max-width: 820px) calc(100vw - 68px), 310px"
+                width={card.width}
+                height={card.height}
+                alt={card.alt}
+                loading="lazy"
+                whileHover={{ y: -8, rotate: index % 2 ? 1.5 : -1.5 }}
+              />
               <div className="feature-card-copy">
                 <span>0{index + 1}</span>
                 <h3>{COMING_SOON}</h3>
@@ -193,16 +191,16 @@ function Home() {
           </Reveal>
           <Reveal className="workshop-visual">
             <div className="orange-orbit" />
-            <div className="workshop-brand-art" aria-hidden="true">
-              <Blocks />
-              <img
-                src="/images/brand/ncreate-logo.webp"
-                width="500"
-                height="500"
-                loading="lazy"
-                alt=""
-              />
-            </div>
+            <img
+              className="workshop-art"
+              src="/images/ncreate/ncreate-image-04.webp"
+              srcSet="/images/ncreate/ncreate-image-04-480.webp 480w, /images/ncreate/ncreate-image-04-640.webp 640w, /images/ncreate/ncreate-image-04-840.webp 840w, /images/ncreate/ncreate-image-04.webp 1659w"
+              sizes="(max-width: 820px) calc(100vw - 52px), 760px"
+              width="1659"
+              height="919"
+              loading="lazy"
+              alt="Медведь-строитель с молотком, ограждением и дорожными конусами"
+            />
           </Reveal>
         </div>
       </section>
@@ -222,13 +220,13 @@ function Home() {
         </Reveal>
         <img
           className="play-mascot"
-          src="/images/ncreate/mascot-back.webp"
-          srcSet="/images/ncreate/mascot-back-480.webp 480w, /images/ncreate/mascot-back.webp 552w"
+          src="/images/ncreate/ncreate-image-07.webp"
+          srcSet="/images/ncreate/ncreate-image-07-480.webp 480w, /images/ncreate/ncreate-image-07-640.webp 640w, /images/ncreate/ncreate-image-07.webp 666w"
           sizes="(max-width: 820px) 78vw, 520px"
-          width="552"
-          height="1199"
+          width="666"
+          height="1395"
           loading="lazy"
-          alt="Официальный маскот NCreate, вид сзади"
+          alt="Персонаж NCreate в красно-золотой одежде"
         />
       </section>
 
@@ -240,7 +238,18 @@ function Home() {
             <br />к нам
           </h2>
         </Reveal>
-        <div className="social-grid">
+        <div className="social-layout">
+          <img
+            className="social-character"
+            src="/images/ncreate/ncreate-image-08.webp"
+            srcSet="/images/ncreate/ncreate-image-08-480.webp 480w, /images/ncreate/ncreate-image-08-640.webp 640w, /images/ncreate/ncreate-image-08.webp 898w"
+            sizes="(max-width: 820px) 76vw, 420px"
+            width="898"
+            height="1076"
+            loading="lazy"
+            alt="Персонаж NCreate в образе волшебника"
+          />
+          <div className="social-grid">
           {[
             { name: "Telegram", icon: Send },
             { name: "Discord", icon: MessageCircle },
@@ -252,6 +261,7 @@ function Home() {
               <strong>{COMING_SOON}</strong>
             </article>
           ))}
+          </div>
         </div>
       </section>
       <PlayDialog ref={dialog} />
