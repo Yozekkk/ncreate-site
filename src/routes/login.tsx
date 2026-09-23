@@ -1,14 +1,12 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 import { useAuth } from "../lib";
+import { safeAuthRedirect } from "../auth-redirect";
 import { AuthForm, SiteShell } from "../ui";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (search: Record<string, unknown>) => ({
-    redirect:
-      typeof search.redirect === "string" && search.redirect.startsWith("/")
-        ? search.redirect
-        : undefined,
+    redirect: safeAuthRedirect(search.redirect),
   }),
   component: LoginPage,
 });
