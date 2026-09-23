@@ -25,5 +25,63 @@ export const formatDate=(v:string)=>new Intl.DateTimeFormat("ru-RU",{dateStyle:"
 
 interface Auth {ready:boolean;session:Session|null;user:User|null;profile:Profile|null;role:string|null;logout:()=>Promise<void>}
 const Context=createContext<Auth|null>(null);
-export function AuthProvider({children}:{children:React.ReactNode}){const[session,setSession]=useState<Session|null>(null);const[profile,setProfile]=useState<Profile|null>(null);const[role,setRole]=useState<string|null>(null);const[ready,setReady]=useState(false);useEffect(()=>{const sync=async(s:Session|null)=>{setSession(s);if(s?.user){const[{data:p},{data:r}]=await Promise.all([supabase.from("profiles").select("id,username,display_name,avatar_url").eq("id",s.user.id).maybeSingle(),supabase.from("user_roles").select("role").eq("user_id",s.user.id).maybeSingle()]);setProfile(p as Profile|null);setRole((r?.role as string|undefined)??"user")}else{setProfile(null);setRole(null)}setReady(true)};void supabase.auth.getSession().then(({data})=>sync(data.session));const{data}=supabase.auth.onAuthStateChange((_e,s)=>void sync(s));return()=>data.subscription.unsubscribe()},[]);const value=useMemo<Auth>(()=>({ready,session,user:session?.user??null,profile,role,logout:async()=>{await supabase.auth.signOut()}}),[ready,session,profile,role]);return <Context.Provider value={value}>{children}</Context.Provider>}
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [role, setRole] = useState<string | null>(null);
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let version = 0;
+    let active = true;
+    let receivedEvent = false;
+    let currentUserId: string | null = null;
+    const sync = async (nextSession: Session | null) => {
+      const current = ++version;
+      setSession(nextSession);
+      if (!nextSession) {
+        currentUserId = null;
+        setProfile(null);
+        setRole(null);
+        setReady(true);
+        return;
+      }
+      if (currentUserId !== nextSession.user.id) {
+        currentUserId = nextSession.user.id;
+        setReady(false);
+        setProfile(null);
+        setRole(null);
+      }
+      try {
+        const [{ data: nextProfile }, { data: nextRole }] = await Promise.all([
+          supabase.from("profiles").select("id,username,display_name,avatar_url").eq("id", nextSession.user.id).maybeSingle(),
+          supabase.from("user_roles").select("role").eq("user_id", nextSession.user.id).maybeSingle(),
+        ]);
+        if (!active || current !== version) return;
+        setProfile(nextProfile as Profile | null);
+        setRole((nextRole?.role as string | undefined) ?? "user");
+      } catch {
+        if (!active || current !== version) return;
+        setProfile(null);
+        setRole(null);
+      } finally {
+        if (active && current === version) setReady(true);
+      }
+    };
+    void supabase.auth.getSession().then(({ data }) => {
+      if (active && !receivedEvent) void sync(data.session);
+    }).catch(() => { if (active && !receivedEvent) setReady(true); });
+    const { data } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      receivedEvent = true;
+      queueMicrotask(() => { if (active) void sync(nextSession); });
+    });
+    return () => { active = false; version++; data.subscription.unsubscribe(); };
+  }, []);
+
+  const value = useMemo<Auth>(() => ({
+    ready, session, user: session?.user ?? null, profile, role,
+    logout: async () => { await supabase.auth.signOut(); },
+  }), [ready, session, profile, role]);
+  return <Context.Provider value={value}>{children}</Context.Provider>;
+}
 export function useAuth(){const v=useContext(Context);if(!v)throw new Error("AuthProvider missing");return v}
