@@ -20,7 +20,7 @@ export async function getTopic(slug:string){const{data,error}=await supabase.fro
 export async function getPosts(topicId:string){const{data,error}=await supabase.from("ncreate_forum_posts").select("id,topic_id,author_id,body,created_at").eq("topic_id",topicId).is("deleted_at",null).order("created_at");if(error)throw error;const rows=(data??[])as Omit<Post,"author_name">[];const a=await authors(rows.map(x=>x.author_id));return rows.map(x=>({...x,author_name:a.get(x.author_id)?.display_name??a.get(x.author_id)?.username??"Пользователь"}))}
 export async function createTopic(categoryId:number,title:string,slug:string,body:string){const{error}=await supabase.rpc("create_ncreate_forum_topic",{_category_id:categoryId,_title:title,_slug:slug,_body:body});if(error)throw error}
 export async function createReply(topicId:string,body:string){const{error}=await supabase.rpc("create_ncreate_forum_reply",{_topic_id:topicId,_body:body});if(error)throw error}
-export const slugify=(v:string)=>`${v.toLowerCase().trim().replace(/[^a-zа-яё0-9]+/gi,"-").replace(/^-|-$/g,"")||"topic"}-${crypto.randomUUID().slice(0,8)}`;
+export { slugify } from "./forum-slug";
 export const formatDate=(v:string)=>new Intl.DateTimeFormat("ru-RU",{dateStyle:"medium",timeStyle:"short"}).format(new Date(v));
 
 interface Auth {ready:boolean;session:Session|null;user:User|null;profile:Profile|null;role:string|null;logout:()=>Promise<void>}
