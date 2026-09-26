@@ -10,3 +10,5 @@ dist/
 coverage/
 output/
 *.log
+
+/public/build-info.json
