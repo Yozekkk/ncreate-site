@@ -1,3 +1,4 @@
+import { ForumState } from "../../../forum-state";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
@@ -25,7 +26,9 @@ function CategoryPage() {
     enabled: Boolean(category.data),
   });
 
-  if (!category.isPending && !category.data) {
+  if (category.isPending || category.isError) return <ForumShell title="Форум NCreate" categories={categories.data ?? []}><ForumState error={category.isError} loading={category.isPending} retry={() => { void category.refetch(); void categories.refetch(); } } /></ForumShell>;
+
+  if (!category.isPending && !category.isError && !category.data) {
     return (
       <ForumShell title="Категория не найдена" categories={categories.data ?? []}>
         <div className="empty-state">
@@ -44,7 +47,8 @@ function CategoryPage() {
       categories={categories.data ?? []}
     >
       <div className="category-page">
-        <TopicList topics={topics.data ?? []} />
+        <ForumState error={topics.isError || categories.isError} loading={topics.isPending} retry={() => { void topics.refetch(); void categories.refetch(); }} />
+        {!topics.isPending && !topics.isError && <TopicList topics={topics.data ?? []} />}
         {auth.user && category.data ? (
           <TopicForm categoryId={category.data.id} />
         ) : (

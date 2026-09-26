@@ -1,3 +1,4 @@
+import { ForumState } from "../../../forum-state";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Lock, Pin } from "lucide-react";
@@ -33,7 +34,9 @@ function TopicPage() {
     enabled: Boolean(topic.data),
   });
 
-  if (!topic.isPending && !topic.data) {
+  if (topic.isPending || topic.isError) return <ForumShell title="Форум NCreate" categories={categories.data ?? []}><ForumState error={topic.isError} loading={topic.isPending} retry={() => { void topic.refetch(); void categories.refetch(); } } /></ForumShell>;
+
+  if (!topic.isPending && !topic.isError && !topic.data) {
     return (
       <ForumShell title="Тема не найдена" categories={categories.data ?? []}>
         <div className="empty-state">
@@ -61,6 +64,7 @@ function TopicPage() {
         {topic.data?.is_pinned ? <span><Pin aria-hidden="true" />Закреплено</span> : null}
         {topic.data?.is_locked ? <span><Lock aria-hidden="true" />Закрыто</span> : null}
       </div>
+      <ForumState error={posts.isError || categories.isError} loading={posts.isPending} retry={() => { void posts.refetch(); void categories.refetch(); }} />
       <div className="post-list">
         {(posts.data ?? []).map((post, index) => (
           <article className="forum-post" key={post.id}>

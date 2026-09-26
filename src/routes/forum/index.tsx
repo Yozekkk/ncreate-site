@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
 import { getCategories, getTopics } from "../../lib";
+import { ForumState } from "../../forum-state";
 import { ForumShell, TopicList } from "../../ui";
 
 export const Route = createFileRoute("/forum/")({
@@ -24,13 +25,8 @@ function ForumPage() {
       subtitle="Обсуждения сообщества NCreate"
       categories={categories.data ?? []}
     >
-      {topics.isError ? (
-        <div className="form-alert" role="alert">
-          Не удалось загрузить форум
-        </div>
-      ) : (
-        <TopicList topics={topics.data ?? []} />
-      )}
+      <ForumState error={topics.isError || categories.isError} loading={topics.isPending || categories.isPending} retry={() => { void topics.refetch(); void categories.refetch(); }} />
+      {!topics.isPending && !topics.isError && !categories.isError && <TopicList topics={topics.data ?? []} />}
     </ForumShell>
   );
 }
