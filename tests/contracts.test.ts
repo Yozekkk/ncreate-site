@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import test from "node:test";
 
 test("unknown server values remain safe placeholders", () => {
   const defaults = {
     serverIp: null,
     minecraftVersion: null,
-    onlinePlayers: 0,
-    recordPlayers: 0,
-    totalPlayers: 0,
+    averageOnline: null,
+    uptimePercent: null,
     discordUrl: null,
     telegramUrl: null,
     youtubeUrl: null,
@@ -15,7 +15,14 @@ test("unknown server values remain safe placeholders", () => {
     launcherUrl: null,
   };
 
-  assert.equal(Object.values(defaults).every((value) => value === null || value === 0), true);
+  assert.equal(Object.values(defaults).every((value) => value === null), true);
+});
+
+test("public NCreate code never exposes current player count", () => {
+  for (const path of ["src/lib.tsx", "src/routes/index.tsx", "src/ui.tsx"]) {
+    const source = readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+    assert.doesNotMatch(source, /online_players|Игроков в сети|На сервере\s+.*игроков/i, path);
+  }
 });
 
 test("NCreate forum routes remain isolated from NCEA routes", () => {

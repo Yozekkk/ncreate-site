@@ -5,13 +5,31 @@ export const COMING_SOON = "Скоро будет";
 const supabase = createClient(import.meta.env.VITE_SUPABASE_URL || "https://bualqaeinwifoopzflbt.supabase.co",import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || "sb_publishable_rPbG4EP0YEypHLKVMHEYpA_pGVFQX0M",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
 export { supabase };
 
-export interface Settings {site_id:string;server_name:string;hero_title:string;hero_subtitle:string|null;server_ip:string|null;minecraft_version:string|null;online_players:number;record_players:number;total_players:number;discord_url:string|null;telegram_url:string|null;youtube_url:string|null;vk_url:string|null;donate_url:string|null;launcher_url:string|null;status:string;updated_at:string}
+export interface Settings {site_id:string;server_name:string;hero_title:string;hero_subtitle:string|null;server_ip:string|null;minecraft_version:string|null;average_online:number|null;uptime_percent:number|null;discord_url:string|null;telegram_url:string|null;youtube_url:string|null;vk_url:string|null;donate_url:string|null;launcher_url:string|null;status:string;updated_at:string}
 export interface Category {id:number;slug:string;name:string;description:string|null;sort_order:number;is_active:boolean}
 export interface Topic {id:string;category_id:number;author_id:string;title:string;slug:string;is_pinned:boolean;is_locked:boolean;created_at:string;author_name:string;reply_count:number}
 export interface Post {id:string;topic_id:string;author_id:string;body:string;created_at:string;author_name:string}
 export interface Profile {id:string;username:string;display_name:string|null;avatar_url:string|null}
 
-export async function getSettings(){const{data,error}=await supabase.from("ncreate_site_settings").select("*").eq("site_id","ncreate").maybeSingle();if(error)throw error;return data as Settings|null}
+export async function getSettings(){const{data,error}=await supabase.from("ncreate_site_settings").select("site_id,server_name,hero_title,hero_subtitle,server_ip,minecraft_version,average_online,uptime_percent,discord_url,telegram_url,youtube_url,vk_url,donate_url,launcher_url,status,updated_at").eq("site_id","ncreate").maybeSingle();if(error)throw error;return data as Settings|null}
+export interface HomeSection { id:number; section_key:string; title:string|null; subtitle:string|null }
+export interface HomeCard { id:number; section_id:number; title:string; description:string|null; image_url:string|null }
+export async function getHomeContent() {
+  const [sections, cards] = await Promise.all([
+    supabase.from("ncreate_home_sections")
+      .select("id,section_key,title,subtitle")
+      .eq("is_published", true).order("sort_order").order("id"),
+    supabase.from("ncreate_home_cards")
+      .select("id,section_id,title,description,image_url")
+      .eq("is_published", true).order("sort_order").order("id"),
+  ]);
+  if (sections.error) throw sections.error;
+  if (cards.error) throw cards.error;
+  return {
+    sections: (sections.data ?? []) as HomeSection[],
+    cards: (cards.data ?? []) as HomeCard[],
+  };
+}
 export async function getCategories(){const{data,error}=await supabase.from("ncreate_forum_categories").select("id,slug,name,description,sort_order,is_active").eq("is_active",true).order("sort_order");if(error)throw error;return(data??[])as Category[]}
 async function authors(ids:string[]){if(!ids.length)return new Map<string,Profile>();const{data}=await supabase.from("profiles").select("id,username,display_name,avatar_url").in("id",[...new Set(ids)]);return new Map((data??[]).map(p=>[p.id as string,p as Profile]))}
 export async function getTopics(categoryId?:number){let q=supabase.from("ncreate_forum_topics").select("id,category_id,author_id,title,slug,is_pinned,is_locked,created_at").is("deleted_at",null).order("is_pinned",{ascending:false}).order("created_at",{ascending:false});if(categoryId!==undefined)q=q.eq("category_id",categoryId);const{data,error}=await q;if(error)throw error;const rows=(data??[])as Omit<Topic,"author_name"|"reply_count">[];const[a,p]=await Promise.all([authors(rows.map(x=>x.author_id)),rows.length?supabase.from("ncreate_forum_posts").select("topic_id").in("topic_id",rows.map(x=>x.id)).is("deleted_at",null):Promise.resolve({data:[]})]);const counts=new Map<string,number>();for(const x of p.data??[])counts.set(x.topic_id as string,(counts.get(x.topic_id as string)??0)+1);return rows.map(x=>({...x,author_name:a.get(x.author_id)?.display_name??a.get(x.author_id)?.username??"Пользователь",reply_count:Math.max(0,(counts.get(x.id)??1)-1)}))}
