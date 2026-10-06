@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowDownRight,
+  Download,
   MessageCircle,
   Play,
   Send,
@@ -10,6 +11,7 @@ import {
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef } from "react";
 import { COMING_SOON, getSettings } from "../lib";
+import { launcherDownloads, launcherReleaseUrl } from "../launcher-release";
 import { PlayDialog, Reveal, SiteShell } from "../ui";
 
 export const Route = createFileRoute("/")({ component: Home });
@@ -202,6 +204,36 @@ function Home() {
               alt="Медведь-строитель с молотком, ограждением и дорожными конусами"
             />
           </Reveal>
+        </div>
+      </section>
+
+      <section className="launcher-section" id="launcher" aria-labelledby="launcher-title">
+        <div className="launcher-panel">
+          <img
+            className="launcher-art"
+            src="/images/seasonal/autumn-world.webp"
+            width="1393"
+            height="880"
+            loading="lazy"
+            alt="Осенний мир NCreate с персонажами Minecraft среди красных деревьев"
+          />
+          <div className="launcher-shade" aria-hidden="true" />
+          <div className="launcher-copy">
+            <p className="eyebrow">ПЕРВЫЙ СТАБИЛЬНЫЙ ВЫПУСК</p>
+            <h2 id="launcher-title">NCreate Launcher <span>1.0.0</span></h2>
+            <p className="launcher-lead">Твой Minecraft, твои сборки. Официальная NCreate Server, каталог Modrinth и аккаунты в новом осеннем интерфейсе.</p>
+            <p className="launcher-java">Подходящая Java определяется по версии Minecraft и при необходимости подготавливается автоматически.</p>
+            <div className="launcher-downloads" aria-label="Скачать NCreate Launcher">
+              {launcherDownloads.map((download) => (
+                <a className="launcher-download" href={download.url} key={download.label}>
+                  <Download aria-hidden="true" />
+                  <span><strong>{download.label}</strong><small>{download.detail}</small></span>
+                </a>
+              ))}
+            </div>
+            <a className="launcher-notes" href={launcherReleaseUrl}>Заметки о выпуске и контрольные суммы <ArrowDownRight aria-hidden="true" /></a>
+          </div>
+          <img className="launcher-pumpkin" src="/images/seasonal/autumn-pumpkin.webp" width="234" height="184" loading="lazy" alt="" aria-hidden="true" />
         </div>
       </section>
 
