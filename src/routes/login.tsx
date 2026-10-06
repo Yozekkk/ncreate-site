@@ -25,11 +25,10 @@ function LoginPage() {
         <div className="auth-art" aria-hidden="true">
           <div className="auth-glow" />
           <img
-            src="/images/ncreate/ncreate-image-06.webp"
-            srcSet="/images/ncreate/ncreate-image-06-480.webp 480w, /images/ncreate/ncreate-image-06-640.webp 640w, /images/ncreate/ncreate-image-06.webp 865w"
+            src="/images/seasonal/october-knight.webp"
             sizes="(max-width: 820px) 80vw, 520px"
-            width="865"
-            height="1465"
+            width="1024"
+            height="1536"
             alt=""
             loading="eager"
           />
