@@ -20,11 +20,10 @@ function RegisterPage() {
         <div className="auth-art accent" aria-hidden="true">
           <div className="auth-glow" />
           <img
-            src="/images/ncreate/ncreate-image-08.webp"
-            srcSet="/images/ncreate/ncreate-image-08-480.webp 480w, /images/ncreate/ncreate-image-08-640.webp 640w, /images/ncreate/ncreate-image-08.webp 898w"
+            src="/images/seasonal/october-lantern.webp"
             sizes="(max-width: 820px) 80vw, 520px"
-            width="898"
-            height="1076"
+            width="1381"
+            height="1139"
             alt=""
             loading="eager"
           />
