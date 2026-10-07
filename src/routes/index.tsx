@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowDownRight,
+  Github,
   Download,
   MessageCircle,
   Play,
@@ -20,22 +21,47 @@ type FeatureCard = {
   name: string;
   alt: string;
   src: string;
+  srcSet?: string;
   width: number;
   height: number;
 };
 
 const cards: FeatureCard[] = [
   {
-    name: "adventure", alt: "Осеннее приключение в мире Minecraft", src: "/images/seasonal/october-adventure.webp", width: 736, height: 370,
+    name: "computer",
+    alt: "Старый кубический компьютер",
+    src: "/images/ncreate/ncreate-image-02.webp",
+    srcSet:
+      "/images/ncreate/ncreate-image-02-480.webp 480w, /images/ncreate/ncreate-image-02-640.webp 640w, /images/ncreate/ncreate-image-02-840.webp 840w, /images/ncreate/ncreate-image-02.webp 1228w",
+    width: 1228,
+    height: 1198,
   },
   {
-    name: "pumpkins", alt: "Светящиеся кубические тыквы", src: "/images/seasonal/october-pumpkins.webp", width: 1200, height: 600,
+    name: "orange-cube",
+    alt: "Оранжевый кубический объект",
+    src: "/images/ncreate/ncreate-image-03.webp",
+    srcSet:
+      "/images/ncreate/ncreate-image-03-480.webp 480w, /images/ncreate/ncreate-image-03-640.webp 640w, /images/ncreate/ncreate-image-03-840.webp 840w, /images/ncreate/ncreate-image-03.webp 1155w",
+    width: 1155,
+    height: 1241,
   },
   {
-    name: "lantern", alt: "Осенний персонаж с фонарём", src: "/images/seasonal/october-lantern.webp", width: 1381, height: 1139,
+    name: "lantern-creature",
+    alt: "Кубическое существо с фонарём",
+    src: "/images/ncreate/ncreate-image-05.webp",
+    srcSet:
+      "/images/ncreate/ncreate-image-05-480.webp 480w, /images/ncreate/ncreate-image-05-640.webp 640w, /images/ncreate/ncreate-image-05-840.webp 840w, /images/ncreate/ncreate-image-05.webp 1373w",
+    width: 1373,
+    height: 1106,
   },
   {
-    name: "creature", alt: "Мистическое лесное существо", src: "/images/seasonal/october-creature.webp", width: 1536, height: 1024,
+    name: "red-hero",
+    alt: "Персонаж NCreate в красно-золотой мантии",
+    src: "/images/ncreate/ncreate-image-06.webp",
+    srcSet:
+      "/images/ncreate/ncreate-image-06-480.webp 480w, /images/ncreate/ncreate-image-06-640.webp 640w, /images/ncreate/ncreate-image-06-840.webp 840w, /images/ncreate/ncreate-image-06.webp 865w",
+    width: 865,
+    height: 1465,
   },
 ];
 
@@ -56,6 +82,7 @@ function Home() {
         name: String(card.id),
         alt: card.title,
         src: card.image_url || cards[index % cards.length].src,
+        srcSet: card.image_url ? undefined : cards[index % cards.length].srcSet,
         width: 736,
         height: 414,
         title: card.title,
@@ -103,14 +130,18 @@ function Home() {
           <div className="pixel-spark spark-three" />
           <motion.img
             className="hero-mascot"
-            src="/images/seasonal/october-campfire.webp"
-            width="1312"
-            height="1199"
-            alt="Персонажи Minecraft у осеннего костра"
+            src="/images/ncreate/ncreate-image-01.webp"
+            srcSet="/images/ncreate/ncreate-image-01-480.webp 480w, /images/ncreate/ncreate-image-01-640.webp 640w, /images/ncreate/ncreate-image-01-840.webp 840w, /images/ncreate/ncreate-image-01.webp 1150w"
+            sizes="(max-width: 540px) 94vw, (max-width: 820px) 84vw, 680px"
+            width="1150"
+            height="1353"
+            alt="Персонаж NCreate"
             fetchPriority="high"
             initial={{ opacity: 0, scale: 0.94, y: 28 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
           />
+          <img className="hero-season-pumpkins" src="/images/seasonal/pumpkins.webp" width="941" height="482" alt="" aria-hidden="true" />
+          <img className="hero-season-web" src="/images/seasonal/web.webp" width="282" height="167" alt="" aria-hidden="true" />
         </motion.div>
       </section>
 
@@ -147,6 +178,7 @@ function Home() {
               <motion.img
                 className="feature-card-art"
                 src={card.src}
+                srcSet={card.srcSet}
                 sizes="(max-width: 820px) calc(100vw - 68px), 310px"
                 width={card.width}
                 height={card.height}
@@ -201,10 +233,11 @@ function Home() {
             <div className="orange-orbit" />
             <img
               className="workshop-art"
-              src="/images/seasonal/october-adventure.webp"
+              src="/images/ncreate/ncreate-image-04.webp"
+              srcSet="/images/ncreate/ncreate-image-04-480.webp 480w, /images/ncreate/ncreate-image-04-640.webp 640w, /images/ncreate/ncreate-image-04-840.webp 840w, /images/ncreate/ncreate-image-04.webp 1659w"
               sizes="(max-width: 820px) calc(100vw - 52px), 760px"
-              width="736"
-              height="370"
+              width="1659"
+              height="919"
               loading="lazy"
               alt="Осеннее приключение в мире Minecraft"
             />
@@ -216,7 +249,7 @@ function Home() {
         <div className="launcher-panel">
           <img
             className="launcher-art"
-            src="/images/seasonal/october-world.webp"
+            src="/images/seasonal/autumn-world.webp"
             width="1393"
             height="880"
             loading="lazy"
@@ -236,9 +269,14 @@ function Home() {
                 </a>
               ))}
             </div>
-            <a className="launcher-notes" href={launcherReleaseUrl}>Заметки о выпуске и контрольные суммы <ArrowDownRight aria-hidden="true" /></a>
+            <div className="launcher-links">
+              <a className="launcher-github" href="https://github.com/Yozekkk/ncreate-launcher" target="_blank" rel="noopener noreferrer">
+                <Github aria-hidden="true" /> Посмотреть на GitHub
+              </a>
+              <a className="launcher-notes" href={launcherReleaseUrl}>Заметки о выпуске и контрольные суммы <ArrowDownRight aria-hidden="true" /></a>
+            </div>
           </div>
-          <img className="launcher-pumpkin" src="/images/seasonal/october-pumpkins.webp" width="1200" height="600" loading="lazy" alt="" aria-hidden="true" />
+          <img className="launcher-pumpkin" src="/images/seasonal/pumpkins.webp" width="941" height="482" loading="lazy" alt="" aria-hidden="true" />
         </div>
       </section>
 
@@ -257,9 +295,11 @@ function Home() {
         </Reveal>
         <img
           className="play-mascot"
-          src="/images/seasonal/october-knight.webp"
-          width="1024"
-          height="1536"
+          src="/images/ncreate/ncreate-image-07.webp"
+          srcSet="/images/ncreate/ncreate-image-07-480.webp 480w, /images/ncreate/ncreate-image-07-640.webp 640w, /images/ncreate/ncreate-image-07.webp 666w"
+          sizes="(max-width: 820px) 78vw, 520px"
+          width="666"
+          height="1395"
           loading="lazy"
           alt="Персонаж NCreate в красно-золотой одежде"
         />
@@ -276,7 +316,8 @@ function Home() {
         <div className="social-layout">
           <img
             className="social-character"
-          src="/images/seasonal/october-lantern.webp"
+            src="/images/ncreate/ncreate-image-08.webp"
+            srcSet="/images/ncreate/ncreate-image-08-480.webp 480w, /images/ncreate/ncreate-image-08-640.webp 640w, /images/ncreate/ncreate-image-08.webp 898w"
             sizes="(max-width: 820px) 76vw, 420px"
             width="898"
             height="1076"
