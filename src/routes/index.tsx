@@ -76,6 +76,12 @@ function Home() {
   const { data: homeContent } = useQuery({ queryKey: ["home-content"], queryFn: getHomeContent });
   const playDialog = useRef<HTMLDialogElement>(null);
   const requirementsDialog = useRef<HTMLDialogElement>(null);
+  const storedHeroTitle = settings?.hero_title?.trim();
+  // The initial stored title repeats the brand already shown above the headline.
+  const heroTitle = !storedHeroTitle || storedHeroTitle === "NCreate" || storedHeroTitle === "Создавай. Развивай. Играй в NCreate."
+    ? "Создавай. Развивай. Играй."
+    : storedHeroTitle;
+  const heroLines = heroTitle.split(/(?<=[.!?])\s+/);
   return <SiteShell><div className="home-page">
     <section className="redesign-hero" aria-labelledby="hero-title">
       <div className="hero-field" aria-hidden="true" />
@@ -83,7 +89,7 @@ function Home() {
         <div className="hero-copy-new">
           <div className="hero-identity"><img src="/images/brand/ncreate-logo.webp" alt="Логотип NCreate" width="512" height="512" fetchPriority="high" /><span>NCREATE</span></div>
           <span className="hero-overline">ОФИЦИАЛЬНЫЙ MINECRAFT-ПРОЕКТ</span>
-          <h1 id="hero-title">Создавай. <span>Развивай.</span> <em>Играй.</em></h1>
+          <h1 id="hero-title">{heroLines.map((line, index) => index === heroLines.length - 1 && heroLines.length > 1 ? <em key={index}>{line}</em> : <span key={index}>{line}</span>)}</h1>
           <p>{settings?.hero_subtitle || "Твой мир, твои правила."}<br />Открой мир NCreate Server и начни своё приключение в Minecraft.</p>
           <div className="hero-buttons"><a className="cta cta-green" href={windows.url}><Download aria-hidden /> СКАЧАТЬ ЛАУНЧЕР</a><a className="hero-text-link" href="#features"><span><Play aria-hidden /></span><strong>Что такое NCreate?<small>Узнать о проекте</small></strong></a></div>
           <div className="hero-assurance"><span aria-hidden="true">✦</span> Официальный лаунчер · Windows и Linux</div>
