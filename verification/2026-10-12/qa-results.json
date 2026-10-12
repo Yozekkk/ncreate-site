@@ -1,0 +1,51 @@
+[
+  {
+    "viewport": "1920x1080",
+    "status": 200,
+    "horizontalOverflow": false,
+    "errors": [],
+    "brokenLoadedImages": []
+  },
+  {
+    "viewport": "1440x900",
+    "status": 200,
+    "horizontalOverflow": false,
+    "errors": [],
+    "brokenLoadedImages": []
+  },
+  {
+    "viewport": "1024x768",
+    "status": 200,
+    "horizontalOverflow": false,
+    "errors": [],
+    "brokenLoadedImages": []
+  },
+  {
+    "viewport": "768x1024",
+    "status": 200,
+    "horizontalOverflow": false,
+    "errors": [],
+    "brokenLoadedImages": []
+  },
+  {
+    "viewport": "390x844",
+    "status": 200,
+    "horizontalOverflow": false,
+    "errors": [],
+    "brokenLoadedImages": []
+  },
+  {
+    "viewport": "375x812",
+    "status": 200,
+    "horizontalOverflow": false,
+    "errors": [],
+    "brokenLoadedImages": []
+  },
+  {
+    "viewport": "360x800",
+    "status": 200,
+    "horizontalOverflow": false,
+    "errors": [],
+    "brokenLoadedImages": []
+  }
+]
