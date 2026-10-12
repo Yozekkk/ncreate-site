@@ -1,345 +1,110 @@
 import { useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import {
-  ArrowDownRight,
-  Github,
-  Download,
-  MessageCircle,
-  Play,
-  Send,
-  Youtube,
-} from "lucide-react";
-import { motion, useScroll, useTransform } from "motion/react";
-import { useRef } from "react";
-import { COMING_SOON, getHomeContent, getSettings } from "../lib";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowDown, ArrowLeft, ArrowRight, Download, Github, Info, Play, X } from "lucide-react";
+import { useRef, useState, type KeyboardEvent, type RefObject } from "react";
+import { getHomeContent, getSettings } from "../lib";
 import { launcherDownloads, launcherReleaseUrl } from "../launcher-release";
 import { PlayDialog, Reveal, SiteShell } from "../ui";
 
 export const Route = createFileRoute("/")({ component: Home });
-
-type FeatureCard = {
-  name: string;
-  alt: string;
-  src: string;
-  srcSet?: string;
-  width: number;
-  height: number;
-};
-
-const cards: FeatureCard[] = [
-  {
-    name: "computer",
-    alt: "Старый кубический компьютер",
-    src: "/images/ncreate/ncreate-image-02.webp",
-    srcSet:
-      "/images/ncreate/ncreate-image-02-480.webp 480w, /images/ncreate/ncreate-image-02-640.webp 640w, /images/ncreate/ncreate-image-02-840.webp 840w, /images/ncreate/ncreate-image-02.webp 1228w",
-    width: 1228,
-    height: 1198,
-  },
-  {
-    name: "orange-cube",
-    alt: "Оранжевый кубический объект",
-    src: "/images/ncreate/ncreate-image-03.webp",
-    srcSet:
-      "/images/ncreate/ncreate-image-03-480.webp 480w, /images/ncreate/ncreate-image-03-640.webp 640w, /images/ncreate/ncreate-image-03-840.webp 840w, /images/ncreate/ncreate-image-03.webp 1155w",
-    width: 1155,
-    height: 1241,
-  },
-  {
-    name: "lantern-creature",
-    alt: "Кубическое существо с фонарём",
-    src: "/images/ncreate/ncreate-image-05.webp",
-    srcSet:
-      "/images/ncreate/ncreate-image-05-480.webp 480w, /images/ncreate/ncreate-image-05-640.webp 640w, /images/ncreate/ncreate-image-05-840.webp 840w, /images/ncreate/ncreate-image-05.webp 1373w",
-    width: 1373,
-    height: 1106,
-  },
-  {
-    name: "red-hero",
-    alt: "Персонаж NCreate в красно-золотой мантии",
-    src: "/images/ncreate/ncreate-image-06.webp",
-    srcSet:
-      "/images/ncreate/ncreate-image-06-480.webp 480w, /images/ncreate/ncreate-image-06-640.webp 640w, /images/ncreate/ncreate-image-06-840.webp 840w, /images/ncreate/ncreate-image-06.webp 865w",
-    width: 865,
-    height: 1465,
-  },
+const windows = launcherDownloads[0];
+const slides = [
+  { kicker: "01 / МИР NCREATE", title: "УДИВИТЕЛЬНЫЙ МИР NCREATE", copy: "Исследуй мир NCreate, играй на официальном сервере и выбирай свой путь в Minecraft.", image: "/images/seasonal/autumn-world.webp", alt: "Игровой мир NCreate", kind: "world", width: 1393, height: 880 },
+  { kicker: "02 / ОФИЦИАЛЬНАЯ СБОРКА", title: "СБОРКА NCREATE SERVER", copy: "Официальная сборка для Minecraft 1.21.1 на NeoForge. Лаунчер помогает установить игру и показывает обновления.", image: "/images/launcher/official-home.png", alt: "Интерфейс NCreate Launcher", kind: "launcher", width: 1236, height: 632 },
+  { kicker: "03 / СООБЩЕСТВО", title: "СОЗДАВАЙ СВОЮ ИСТОРИЮ", copy: "Узнавай новости проекта и общайся с игроками на форуме NCreate.", image: "/images/ncreate/ncreate-image-04.webp", alt: "Авторская иллюстрация NCreate", kind: "art", width: 1659, height: 919 },
+] as const;
+const gallery = [
+  ["/images/ncreate/ncreate-image-02.webp", "Кубический компьютер NCreate", "Технологии"],
+  ["/images/ncreate/ncreate-image-03.webp", "Кубический мешок NCreate", "Находки"],
+  ["/images/ncreate/ncreate-image-05.webp", "Существо с фонарём NCreate", "Приключения"],
+  ["/images/ncreate/ncreate-image-08.webp", "Волшебник NCreate", "Персонажи"],
+  ["/images/ncreate/server-card-engineer.webp", "Инженер NCreate", "Мир NCreate"],
+  ["/images/ncreate/server-card-soldier.webp", "Воин NCreate", "Герои"],
 ];
+function gallerySrcSet(src: string) {
+  const base = src.slice(0, -5);
+  if (src.includes("server-card-soldier")) return base + "-560.webp 560w, " + src + " 1102w";
+  if (src.includes("server-card-engineer")) return base + "-840.webp 840w, " + src + " 1672w";
+  const originalWidth = src.includes("image-02") ? 1228 : src.includes("image-03") ? 1155 : src.includes("image-05") ? 1373 : 898;
+  return base + "-480.webp 480w, " + base + "-640.webp 640w, " + base + "-840.webp 840w, " + src + " " + originalWidth + "w";
+}
+
+function Features() {
+  const [active, setActive] = useState(0);
+  const slide = slides[active];
+  const change = (delta: number) => setActive(value => (value + delta + slides.length) % slides.length);
+  const onKeyDown = (event: KeyboardEvent<HTMLElement>) => {
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      event.preventDefault();
+      change(event.key === "ArrowLeft" ? -1 : 1);
+    }
+  };
+  return <section className="features-section" id="features" aria-labelledby="features-title" aria-roledescription="слайдер" tabIndex={0} onKeyDown={onKeyDown}>
+    <div className="features-inner">
+      <div className="features-copy" key={slide.kicker}>
+        <span className="feature-symbol" aria-hidden="true">✦</span>
+        <h2 id="features-title">{slide.title}</h2><p>{slide.copy}</p>
+        <div className="slider-controls"><button type="button" aria-label="Предыдущий слайд" onClick={() => change(-1)}><ArrowLeft aria-hidden /></button><span aria-live="polite">{String(active + 1).padStart(2, "0")} <small>/ {String(slides.length).padStart(2, "0")}</small></span><button type="button" aria-label="Следующий слайд" onClick={() => change(1)}><ArrowRight aria-hidden /></button></div>
+        <a className="cta cta-orange" href="#start"><Play aria-hidden /> НАЧАТЬ ИГРАТЬ</a>
+      </div>
+      <div className={"feature-visual feature-" + slide.kind} key={slide.image}><img src={slide.image} srcSet={slide.kind === "art" ? "/images/ncreate/ncreate-image-04-640.webp 640w, /images/ncreate/ncreate-image-04-840.webp 840w, /images/ncreate/ncreate-image-04.webp 1659w" : undefined} sizes="(max-width: 700px) 100vw, 900px" width={slide.width} height={slide.height} alt={slide.alt} loading="lazy" />{slide.kind === "art" && <img className="feature-visual-character" src="/images/ncreate/ncreate-image-07.webp" width="666" height="1395" alt="" loading="lazy" />}</div>
+    </div>
+  </section>;
+}
+
+function RequirementsDialog({ dialogRef }: { dialogRef: RefObject<HTMLDialogElement | null> }) {
+  const rows = [
+    ["Операционная система", "Windows 10/11 x64 или Linux x64", "Windows 10/11 x64 или Linux x64", "Не опубликовано"],
+    ["Процессор", "Уточняется", "Уточняется", "Уточняется"],
+    ["Оперативная память*", "1 ГБ для игры", "5 ГБ для игры", "Не опубликовано"],
+    ["Видеокарта", "Уточняется", "Уточняется", "Уточняется"],
+    ["Разрешение экрана", "Уточняется", "Уточняется", "Уточняется"],
+    ["Свободное место", "Зависит от версии и содержимого", "Зависит от версии и содержимого", "Не опубликовано"],
+    ["Дополнительно", "Java 21, интернет для первой загрузки", "Java 21, интернет для первой загрузки", "Не опубликовано"],
+  ];
+  return <dialog ref={dialogRef} className="requirements-dialog" aria-labelledby="requirements-title">
+    <div className="requirements-head"><form method="dialog"><button aria-label="Закрыть системные требования"><X aria-hidden /></button></form><div><span className="section-kicker">NCREATE / СПРАВКА</span><h2 id="requirements-title">Системные требования</h2></div></div>
+    <p className="requirements-lead">Подтверждённые параметры официальной сборки NCreate Server. Неопубликованные характеристики требуют уточнения у команды проекта.</p>
+    <p className="requirements-swipe">Прокрутите таблицу вправо, чтобы увидеть все колонки →</p>
+    <div className="requirements-scroll" role="region" aria-label="Таблица системных требований" tabIndex={0}><table><thead><tr><th scope="col">Параметр</th><th scope="col">Минимальные</th><th scope="col">Рекомендуемые</th><th scope="col">Идеальные</th></tr></thead><tbody>{rows.map(row => <tr key={row[0]}><th scope="row">{row[0]}</th>{row.slice(1).map((value, index) => <td key={index}>{value}</td>)}</tr>)}</tbody></table></div>
+    <p className="requirements-note">* 1 ГБ и 5 ГБ — значения выделяемой памяти из manifest сборки 1.0.2; это не оценка общей памяти компьютера. Поддержка Windows в интерфейсе лаунчера требует дополнительной проверки.</p>
+    <a className="requirements-source" href="https://github.com/Yozekkk/ncreate-pack/blob/main/packs/ncreate-server/1.0.2/edition.json" target="_blank" rel="noopener noreferrer">Manifest сборки <ArrowRight aria-hidden /></a>
+  </dialog>;
+}
 
 function Home() {
-  const { data: s } = useQuery({ queryKey: ["settings"], queryFn: getSettings });
+  const { data: settings } = useQuery({ queryKey: ["settings"], queryFn: getSettings });
   const { data: homeContent } = useQuery({ queryKey: ["home-content"], queryFn: getHomeContent });
-  const dialog = useRef<HTMLDialogElement>(null);
-  const hero = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: hero, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 70]);
-  const play = () => dialog.current?.showModal();
-  const title = s?.hero_title ?? "Создавай. Развивай. Играй в NCreate.";
-  const cardSection = homeContent?.sections.find(section => section.section_key === "server") ?? homeContent?.sections[0];
-  const publicCards = homeContent?.cards.filter(card => card.section_id === cardSection?.id) ?? [];
-  const otherSections = homeContent?.sections.filter(section => section.id !== cardSection?.id) ?? [];
-  const visibleCards = publicCards.length
-    ? publicCards.map((card, index) => ({
-        name: String(card.id),
-        alt: card.title,
-        src: card.image_url || cards[index % cards.length].src,
-        srcSet: card.image_url ? undefined : cards[index % cards.length].srcSet,
-        width: 736,
-        height: 414,
-        title: card.title,
-        description: card.description ?? "Информация появится позже",
-      }))
-    : cards.map(card => ({
-        ...card,
-        title: COMING_SOON,
-        description: "Информация появится позже",
-      }));
-
-  return (
-    <SiteShell>
-      <section className="hero" ref={hero}>
-        <div className="hero-copy">
-          <motion.p className="eyebrow october-kicker" initial={{ y: 12 }} animate={{ y: 0 }}>
-            ОКТЯБРЬ В NCREATE · СЕЗОН ТАЙН
-          </motion.p>
-          <motion.h1
-            initial={{ opacity: 0, y: 28 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.72 }}
-          >
-            {title.split(" ").map((word, index) => (
-              <span key={`${word}-${index}`}>{word} </span>
-            ))}
-          </motion.h1>
-          <p className="hero-subtitle">{s?.hero_subtitle ?? COMING_SOON}</p>
-          <div className="hero-actions">
-            <button className="primary-button large" onClick={play}>
-              <Play aria-hidden />
-              Начать играть
-            </button>
-            <a className="round-arrow" href="#server" aria-label="Перейти к информации о сервере">
-              <ArrowDownRight aria-hidden />
-            </a>
-          </div>
+  const playDialog = useRef<HTMLDialogElement>(null);
+  const requirementsDialog = useRef<HTMLDialogElement>(null);
+  return <SiteShell><div className="home-page">
+    <section className="redesign-hero" aria-labelledby="hero-title">
+      <div className="hero-field" aria-hidden="true" />
+      <div className="hero-content">
+        <div className="hero-copy-new">
+          <div className="hero-identity"><img src="/images/brand/ncreate-logo.webp" alt="Логотип NCreate" width="512" height="512" fetchPriority="high" /><span>NCREATE</span></div>
+          <span className="hero-overline">ОФИЦИАЛЬНЫЙ MINECRAFT-ПРОЕКТ</span>
+          <h1 id="hero-title">Создавай. <span>Развивай.</span> <em>Играй.</em></h1>
+          <p>{settings?.hero_subtitle || "Твой мир, твои правила."}<br />Открой мир NCreate Server и начни своё приключение в Minecraft.</p>
+          <div className="hero-buttons"><a className="cta cta-green" href={windows.url}><Download aria-hidden /> СКАЧАТЬ ЛАУНЧЕР</a><a className="hero-text-link" href="#features"><span><Play aria-hidden /></span><strong>Что такое NCreate?<small>Узнать о проекте</small></strong></a></div>
+          <div className="hero-assurance"><span aria-hidden="true">✦</span> Официальный лаунчер · Windows и Linux</div>
+          {(settings?.average_online != null || settings?.uptime_percent != null) && <div className="hero-live" aria-label="Статистика проекта">{settings.average_online != null && <div><strong>{settings.average_online.toLocaleString("ru-RU")}</strong><span>средний онлайн</span></div>}{settings.uptime_percent != null && <div><strong>{settings.uptime_percent.toLocaleString("ru-RU", { maximumFractionDigits: 2 })}%</strong><span>аптайм сервера</span></div>}</div>}
         </div>
-        <motion.div className="hero-art october-hero-art" style={{ y }}>
-          <div className="hero-panel panel-one" />
-          <div className="hero-panel panel-two" />
-          <div className="hero-panel panel-three" />
-          <div className="pixel-spark spark-one" />
-          <div className="pixel-spark spark-two" />
-          <div className="pixel-spark spark-three" />
-          <motion.img
-            className="hero-mascot"
-            src="/images/ncreate/ncreate-image-01.webp"
-            srcSet="/images/ncreate/ncreate-image-01-480.webp 480w, /images/ncreate/ncreate-image-01-640.webp 640w, /images/ncreate/ncreate-image-01-840.webp 840w, /images/ncreate/ncreate-image-01.webp 1150w"
-            sizes="(max-width: 540px) 94vw, (max-width: 820px) 84vw, 680px"
-            width="1150"
-            height="1353"
-            alt="Персонаж NCreate"
-            fetchPriority="high"
-            initial={{ opacity: 0, scale: 0.94, y: 28 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-          />
-          <img className="hero-season-pumpkins" src="/images/seasonal/pumpkins.webp" width="941" height="482" alt="" aria-hidden="true" />
-          <img className="hero-season-web" src="/images/seasonal/web.webp" width="282" height="167" alt="" aria-hidden="true" />
-        </motion.div>
-      </section>
-
-      <section className="stats-section" aria-label="Статистика сервера">
-        {[
-          ["Средний онлайн", s?.average_online == null ? "—" : s.average_online.toLocaleString("ru-RU")],
-          ["Аптайм сервера", s?.uptime_percent == null ? "—" : `${s.uptime_percent.toLocaleString("ru-RU", { maximumFractionDigits: 2 })}%`],
-        ].map(([label, value]) => (
-          <div className="stat" key={String(label)}>
-            <strong>{value}</strong>
-            <span>{label}</span>
-          </div>
-        ))}
-      </section>
-
-      <section className="dark-stage" id="server">
-        <Reveal className="stage-heading">
-          <h2 className="sr-only">NCreate</h2>
-          <img
-            src="/images/voxel/ncreate-title-new.webp"
-            srcSet="/images/voxel/ncreate-title-new-640.webp 640w, /images/voxel/ncreate-title-new.webp 1594w"
-            sizes="(max-width: 820px) calc(100vw - 28px), 1100px"
-            width="1594"
-            height="398"
-            alt="Объёмный заголовок NCREATE СЕРВЕР"
-            loading="lazy"
-          />
-          {cardSection?.title && <h3 className="stage-dynamic-title">{cardSection.title}</h3>}
-          <p>{cardSection?.subtitle ?? "Октябрь приносит новые истории, тайны и приключения"}</p>
-        </Reveal>
-        <div className="feature-cards">
-          {visibleCards.map((card, index) => (
-            <Reveal className={`feature-card card-${index + 1}`} key={card.name}>
-              <motion.img
-                className="feature-card-art"
-                src={card.src}
-                srcSet={card.srcSet}
-                sizes="(max-width: 820px) calc(100vw - 68px), 310px"
-                width={card.width}
-                height={card.height}
-                alt={card.alt}
-                loading="lazy"
-                whileHover={{ y: -8, rotate: index % 2 ? 1.5 : -1.5 }}
-              />
-              <div className="feature-card-copy">
-                <span>0{index + 1}</span>
-                <h3>{card.title}</h3>
-                <p>{card.description}</p>
-              </div>
-            </Reveal>
-          ))}
-        </div>
-        {otherSections.map(section => (
-          <div className="published-section" key={section.id}>
-            <h2>{section.title ?? section.section_key}</h2>
-            {section.subtitle && <p>{section.subtitle}</p>}
-            <div className="published-cards">
-              {homeContent?.cards.filter(card => card.section_id === section.id).map(card => (
-                <article className="published-card" key={card.id}>
-                  {card.image_url && <img src={card.image_url} alt="" loading="lazy" />}
-                  <h3>{card.title}</h3>
-                  {card.description && <p>{card.description}</p>}
-                </article>
-              ))}
-            </div>
-          </div>
-        ))}
-      </section>
-
-      <section className="workshop-section">
-        <Reveal className="section-intro">
-          <p className="eyebrow">NCREATE / 02</p>
-          <h2>
-            Всё начинается
-            <br />с идеи
-          </h2>
-          <p>{COMING_SOON}</p>
-        </Reveal>
-        <div className="workshop-grid">
-          <Reveal className="workshop-copy">
-            <span className="number-chip">00</span>
-            <h3>{COMING_SOON}</h3>
-            <p>Информация появится позже</p>
-            <div className="fake-meter">
-              <i />
-            </div>
-          </Reveal>
-          <Reveal className="workshop-visual">
-            <div className="orange-orbit" />
-            <img
-              className="workshop-art"
-              src="/images/ncreate/ncreate-image-04.webp"
-              srcSet="/images/ncreate/ncreate-image-04-480.webp 480w, /images/ncreate/ncreate-image-04-640.webp 640w, /images/ncreate/ncreate-image-04-840.webp 840w, /images/ncreate/ncreate-image-04.webp 1659w"
-              sizes="(max-width: 820px) calc(100vw - 52px), 760px"
-              width="1659"
-              height="919"
-              loading="lazy"
-              alt="Осеннее приключение в мире Minecraft"
-            />
-          </Reveal>
-        </div>
-      </section>
-
-      <section className="launcher-section" id="launcher" aria-labelledby="launcher-title">
-        <div className="launcher-panel">
-          <img
-            className="launcher-art"
-            src="/images/seasonal/autumn-world.webp"
-            width="1393"
-            height="880"
-            loading="lazy"
-            alt="Осенний мир NCreate с персонажами Minecraft среди красных деревьев"
-          />
-          <div className="launcher-shade" aria-hidden="true" />
-          <div className="launcher-copy">
-            <p className="eyebrow">ОКТЯБРЬ · ПЕРВЫЙ СТАБИЛЬНЫЙ ВЫПУСК</p>
-            <h2 id="launcher-title">NCreate Launcher <span>1.0.0</span></h2>
-            <p className="launcher-lead">Твой Minecraft, твои сборки. Официальная NCreate Server, каталог Modrinth и аккаунты в новом осеннем интерфейсе.</p>
-            <p className="launcher-java">Подходящая Java определяется по версии Minecraft и при необходимости подготавливается автоматически.</p>
-            <div className="launcher-downloads" aria-label="Скачать NCreate Launcher">
-              {launcherDownloads.map((download) => (
-                <a className="launcher-download" href={download.url} key={download.label}>
-                  <Download aria-hidden="true" />
-                  <span><strong>{download.label}</strong><small>{download.detail}</small></span>
-                </a>
-              ))}
-            </div>
-            <div className="launcher-links">
-              <a className="launcher-github" href="https://github.com/Yozekkk/ncreate-launcher" target="_blank" rel="noopener noreferrer">
-                <Github aria-hidden="true" /> Посмотреть на GitHub
-              </a>
-              <a className="launcher-notes" href={launcherReleaseUrl}>Заметки о выпуске и контрольные суммы <ArrowDownRight aria-hidden="true" /></a>
-            </div>
-          </div>
-          <img className="launcher-pumpkin" src="/images/seasonal/pumpkins.webp" width="941" height="482" loading="lazy" alt="" aria-hidden="true" />
-        </div>
-      </section>
-
-      <section className="play-section">
-        <Reveal className="play-content">
-          <p className="eyebrow">ТВОЯ СЛЕДУЮЩАЯ ИГРА</p>
-          <h2>
-            Начать
-            <br />играть
-          </h2>
-          <p>{COMING_SOON}</p>
-          <button className="light-button" onClick={play}>
-            <Play aria-hidden />
-            Начать играть
-          </button>
-        </Reveal>
-        <img
-          className="play-mascot"
-          src="/images/ncreate/ncreate-image-07.webp"
-          srcSet="/images/ncreate/ncreate-image-07-480.webp 480w, /images/ncreate/ncreate-image-07-640.webp 640w, /images/ncreate/ncreate-image-07.webp 666w"
-          sizes="(max-width: 820px) 78vw, 520px"
-          width="666"
-          height="1395"
-          loading="lazy"
-          alt="Персонаж NCreate в красно-золотой одежде"
-        />
-      </section>
-
-      <section className="social-section">
-        <Reveal className="section-intro light">
-          <p className="eyebrow">СООБЩЕСТВО</p>
-          <h2>
-            Подключайся
-            <br />к нам
-          </h2>
-        </Reveal>
-        <div className="social-layout">
-          <img
-            className="social-character"
-            src="/images/ncreate/ncreate-image-08.webp"
-            srcSet="/images/ncreate/ncreate-image-08-480.webp 480w, /images/ncreate/ncreate-image-08-640.webp 640w, /images/ncreate/ncreate-image-08.webp 898w"
-            sizes="(max-width: 820px) 76vw, 420px"
-            width="898"
-            height="1076"
-            loading="lazy"
-            alt="Персонаж NCreate в образе волшебника"
-          />
-          <div className="social-grid">
-          {[
-            { name: "Telegram", icon: Send },
-            { name: "Discord", icon: MessageCircle },
-            { name: "YouTube", icon: Youtube },
-          ].map(({ name, icon: Icon }, index) => (
-            <article className={`social-card social-${index + 1}`} aria-disabled="true" key={name}>
-              <Icon aria-hidden />
-              <span>{name}</span>
-              <strong>{COMING_SOON}</strong>
-            </article>
-          ))}
-          </div>
-        </div>
-      </section>
-      <PlayDialog ref={dialog} />
-    </SiteShell>
-  );
+        <div className="hero-characters" aria-label="Персонажи NCreate"><img className="hero-character-back" src="/images/ncreate/ncreate-image-06.webp" srcSet="/images/ncreate/ncreate-image-06-640.webp 640w, /images/ncreate/ncreate-image-06.webp 865w" sizes="(max-width: 700px) 50vw, 34vw" width="865" height="1465" alt="Персонаж NCreate в красно-золотой мантии" fetchPriority="high" /><img className="hero-character-front" src="/images/ncreate/ncreate-image-01.webp" srcSet="/images/ncreate/ncreate-image-01-640.webp 640w, /images/ncreate/ncreate-image-01-840.webp 840w, /images/ncreate/ncreate-image-01.webp 1150w" sizes="(max-width: 700px) 70vw, 46vw" width="1150" height="1353" alt="Главный персонаж NCreate" fetchPriority="high" /><img className="hero-pumpkins" src="/images/seasonal/pumpkins.webp" width="941" height="482" alt="" aria-hidden="true" /></div>
+        <a className="hero-side-link" href="#features">УЗНАТЬ ЧТО ЗА ПРОЕКТ <ArrowRight aria-hidden /></a><a className="hero-scroll" href="#features" aria-label="Прокрутить к особенностям"><ArrowDown aria-hidden /></a>
+      </div>
+    </section>
+    <Features />
+    <section className="start-section" id="start" aria-labelledby="start-title"><div className="start-heading"><span className="section-kicker">ПЕРВЫЕ ШАГИ</span><h2 id="start-title">КАК НАЧАТЬ ИГРАТЬ</h2><p>Два простых шага — и твой мир NCreate откроется.</p></div><div className="start-grid">
+      <div className="start-step start-step-one"><span className="step-chip">Шаг 1</span><h3>Загрузите лаунчер</h3><p>Скачайте NCreate Launcher, установите официальную сборку и подготовьте игру к запуску.</p><a className="cta cta-green" href={windows.url}><Download aria-hidden /> СКАЧАТЬ ЛАУНЧЕР</a><span className="start-os">Windows 10/11 x64 · Linux x64</span><button className="start-inline" type="button" onClick={() => playDialog.current?.showModal()}>Другие версии для Linux <ArrowRight aria-hidden /></button><button className="start-inline" type="button" onClick={() => requirementsDialog.current?.showModal()}>Системные требования <Info aria-hidden /></button></div>
+      <div className="launcher-composition"><div className="launcher-window"><img src="/images/launcher/official-home.png" width="1236" height="632" loading="lazy" alt="Интерфейс NCreate Launcher с официальной сборкой" /></div><img className="launcher-character" src="/images/ncreate/ncreate-image-07.webp" srcSet="/images/ncreate/ncreate-image-07-480.webp 480w, /images/ncreate/ncreate-image-07.webp 666w" sizes="(max-width: 700px) 42vw, 250px" width="666" height="1395" loading="lazy" alt="Персонаж NCreate" /></div>
+      <div className="start-step start-step-two"><span className="step-chip">Шаг 2</span><h3>Вход в игру</h3><p>Откройте лаунчер, установите сборку NCreate Server и запустите Minecraft. Выберите доступный в лаунчере способ входа.</p><p>Новости проекта и обсуждения доступны на форуме.</p><Link className="outline-button" to="/forum">ПЕРЕЙТИ НА ФОРУМ <ArrowRight aria-hidden /></Link></div>
+    </div></section>
+    <section className="showcase-section" id="server" aria-labelledby="showcase-title"><div className="showcase-head"><div><span className="section-kicker">МИР NCREATE</span><h2 id="showcase-title">ЗНАКОМЬСЯ С МИРОМ</h2><p>Оригинальные персонажи и иллюстрации проекта.</p></div><img src="/images/voxel/ncreate-title-new.webp" srcSet="/images/voxel/ncreate-title-new-640.webp 640w, /images/voxel/ncreate-title-new.webp 1594w" sizes="(max-width: 700px) 300px, 430px" width="1594" height="398" alt="NCREATE СЕРВЕР" loading="lazy" /></div><div className="art-grid">{gallery.map(item => <Reveal className="art-card" key={item[0]}><img src={item[0]} srcSet={gallerySrcSet(item[0])} sizes="(max-width: 700px) 45vw, 450px" alt={item[1]} loading="lazy" /><span>{item[2]}</span></Reveal>)}</div><div className="showcase-extra"><img src="/images/ncreate/mascot-front.webp" srcSet="/images/ncreate/mascot-front-640.webp 640w, /images/ncreate/mascot-front.webp 760w" sizes="300px" width="760" height="1199" loading="lazy" alt="Маскот NCreate, вид спереди" /><div><h3>ИСТОРИИ СОЗДАЮТ ИГРОКИ</h3><p>Следи за обновлениями проекта и общайся с сообществом NCreate.</p><Link className="cta cta-orange" to="/forum">ОТКРЫТЬ ФОРУМ <ArrowRight aria-hidden /></Link></div><img src="/images/ncreate/mascot-back.webp" srcSet="/images/ncreate/mascot-back-480.webp 480w, /images/ncreate/mascot-back.webp 552w" sizes="300px" width="552" height="1199" loading="lazy" alt="Маскот NCreate, вид сзади" /></div>
+      {homeContent?.sections.map(section => <div className="published-section" key={section.id}><h2>{section.title ?? section.section_key}</h2>{section.subtitle && <p>{section.subtitle}</p>}<div className="published-cards">{homeContent.cards.filter(card => card.section_id === section.id).map(card => <article className="published-card" key={card.id}>{card.image_url && <img src={card.image_url} alt="" loading="lazy" />}<h3>{card.title}</h3>{card.description && <p>{card.description}</p>}</article>)}</div></div>)}
+    </section>
+    <section className="download-section" id="launcher" aria-labelledby="download-title"><div className="download-art"><img src="/images/ncreate/server-card-engineer.webp" srcSet="/images/ncreate/server-card-engineer-840.webp 840w, /images/ncreate/server-card-engineer.webp 1672w" sizes="(max-width: 700px) 100vw, 720px" width="1672" height="941" loading="lazy" alt="Инженер NCreate" /></div><div className="download-copy"><span className="section-kicker">NCREATE LAUNCHER</span><h2 id="download-title">ВСЁ ДЛЯ ТВОЕЙ ИГРЫ</h2><p>Лаунчер помогает установить официальную сборку NCreate Server. Подходящая Java проверяется и при необходимости подготавливается автоматически.</p><div className="download-options">{launcherDownloads.map(item => <a href={item.url} key={item.label}><Download aria-hidden /><span><strong>{item.label}</strong><small>{item.detail}</small></span><ArrowRight aria-hidden /></a>)}</div><div className="download-extras"><a href="https://github.com/Yozekkk/ncreate-launcher" target="_blank" rel="noopener noreferrer"><Github aria-hidden /> GitHub лаунчера</a><a href={launcherReleaseUrl} target="_blank" rel="noopener noreferrer">Релиз и SHA-256 <ArrowRight aria-hidden /></a></div></div></section>
+    <section className="community-section" aria-labelledby="community-title"><div><span className="section-kicker">СООБЩЕСТВО</span><h2 id="community-title">БУДЬ ЧАСТЬЮ NCREATE</h2><p>Обсуждай проект и следи за новостями на форуме.</p><Link className="cta cta-orange" to="/forum">ПЕРЕЙТИ НА ФОРУМ <ArrowRight aria-hidden /></Link></div><img src="/images/ncreate/ncreate-image-09.webp" width="1448" height="526" loading="lazy" alt="Панорама мира NCreate" /></section>
+    <PlayDialog ref={playDialog} /><RequirementsDialog dialogRef={requirementsDialog} />
+  </div></SiteShell>;
 }
